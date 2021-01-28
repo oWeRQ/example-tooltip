@@ -133,27 +133,34 @@
 			}
 		}
 
-		document.querySelectorAll('[data-tooltip]').forEach(reference => {
-			const tooltip = document.querySelector(reference.dataset.tooltip);
-			const placement = reference.dataset.placement || 'bottom';
-			reference.addEventListener('mouseenter', () => {
-				tooltip.hidden = false;
+		function referencePlace(reference, element, placement) {
+			const parent = getOffsetParent(element);
+			const referenceRect = reference.getBoundingClientRect();
+			const elementRect = element.getBoundingClientRect();
+			const offsetRect = parent.getBoundingClientRect();
 
-				const parent = getOffsetParent(tooltip);
-				const referenceRect = reference.getBoundingClientRect();
-				const tooltipRect = tooltip.getBoundingClientRect();
-				const offsetRect = parent.getBoundingClientRect();
+			const position = getPlacementOffset(referenceRect, elementRect, placement);
+			const scroll = getScrollOffset(parent);
 
-				const position = getPlacementOffset(referenceRect, tooltipRect, placement);
-				const scroll = getScrollOffset(parent);
+			element.style.left = (referenceRect.left - offsetRect.left + scroll.left + position.left) + 'px';
+			element.style.top = (referenceRect.top - offsetRect.top + scroll.top + position.top) + 'px';
+		}
 
-				tooltip.style.left = referenceRect.left - offsetRect.left + scroll.left + position.left + 'px';
-				tooltip.style.top = referenceRect.top - offsetRect.top + scroll.top + position.top + 'px';
+		function initTooltips(context) {
+			context.querySelectorAll('[data-tooltip]').forEach(reference => {
+				const tooltip = document.querySelector(reference.dataset.tooltip);
+				const placement = reference.dataset.placement || 'bottom';
+				reference.addEventListener('mouseenter', () => {
+					tooltip.hidden = false;
+					referencePlace(reference, tooltip, placement);
+				});
+				reference.addEventListener('mouseleave', () => {
+					tooltip.hidden = true;
+				});
 			});
-			reference.addEventListener('mouseleave', () => {
-				tooltip.hidden = true;
-			});
-		});
+		}
+
+		initTooltips(document);
 	</script>
 </body>
 </html>

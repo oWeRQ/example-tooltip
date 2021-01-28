@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>example-tooltip</title>
+	<style>
+		.wrap {
+			margin: 100px;
+			padding: 100px;
+			position: relative;
+		}
+		.scrollarea {
+			overflow: scroll;
+			position: relative;
+			width: 200px;
+			height: 120vh;
+		}
+		.tooltip {
+			position: absolute;
+			padding: 2px 4px;
+			max-width: 300px;
+			background: lightgray;
+			border: 1px solid gray;
+		}
+		[data-tooltip]:hover {
+			background: lightgray;
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div class="scrollarea">
+			<p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).</p>
+			<a href="#" data-tooltip="#tooltip1">link1</a>
+			<a href="#" data-tooltip="#tooltip2">link2</a>
+			<a href="#" data-tooltip="#tooltip3">link3</a>
+			<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.</p>
+			<div id="tooltip3" class="tooltip" hidden>
+				tooltip3 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+			</div>
+		</div>
+		<div id="tooltip2" class="tooltip" hidden>
+			tooltip2 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+		</div>
+	</div>
+	<div id="tooltip1" class="tooltip" hidden>
+		tooltip1 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+	</div>
+	<script>
+		function getOffsetParent(el) {
+			if (el.offsetParent === document.body && window.getComputedStyle(el.offsetParent).position === 'static') {
+				return document.documentElement;
+			}
+
+			return el.offsetParent;
+		}
+
+		function getScrollOffset(el) {
+			if (el !== document.documentElement) {
+				return {
+					left: el.scrollLeft,
+					top: el.scrollTop,
+				};
+			}
+
+			return {
+				left: 0,
+				top: 0,
+			};
+		}
+
+		function getPlacementOffset(reference, element, placement) {
+			switch (placement) {
+				case 'top':
+					return {
+						left: reference.width / 2 - element.width / 2,
+						top: -element.height,
+					};
+				case 'top-start':
+					return {
+						left: 0,
+						top: -element.height,
+					};
+				case 'top-end':
+					return {
+						left: reference.width - element.width,
+						top: -element.height,
+					};
+				case 'bottom':
+					return {
+						left: reference.width / 2 - element.width / 2,
+						top: reference.height,
+					};
+				case 'bottom-start':
+					return {
+						left: 0,
+						top: reference.height,
+					};
+				case 'bottom-end':
+					return {
+						left: reference.width - element.width,
+						top: reference.height,
+					};
+				case 'right':
+					return {
+						left: reference.width,
+						top: reference.height / 2 - element.height / 2,
+					};
+				case 'right-start':
+					return {
+						left: reference.width,
+						top: 0,
+					};
+				case 'right-end':
+					return {
+						left: reference.width,
+						top: reference.height - element.height,
+					};
+				case 'left':
+					return {
+						left: -element.width,
+						top: reference.height / 2 - element.height / 2,
+					};
+				case 'left-start':
+					return {
+						left: -element.width,
+						top: 0,
+					};
+				case 'left-end':
+					return {
+						left: -element.width,
+						top: reference.height - element.height,
+					};
+			}
+		}
+
+		document.querySelectorAll('[data-tooltip]').forEach(reference => {
+			const tooltip = document.querySelector(reference.dataset.tooltip);
+			const placement = reference.dataset.placement || 'bottom';
+			reference.addEventListener('mouseenter', () => {
+				tooltip.hidden = false;
+
+				const parent = getOffsetParent(tooltip);
+				const referenceRect = reference.getBoundingClientRect();
+				const tooltipRect = tooltip.getBoundingClientRect();
+				const offsetRect = parent.getBoundingClientRect();
+
+				const position = getPlacementOffset(referenceRect, tooltipRect, placement);
+				const scroll = getScrollOffset(parent);
+
+				tooltip.style.left = referenceRect.left - offsetRect.left + scroll.left + position.left + 'px';
+				tooltip.style.top = referenceRect.top - offsetRect.top + scroll.top + position.top + 'px';
+			});
+			reference.addEventListener('mouseleave', () => {
+				tooltip.hidden = true;
+			});
+		});
+	</script>
+</body>
+</html>

@@ -133,17 +133,26 @@
 			}
 		}
 
-		function referencePlace(reference, element, placement) {
+		function getReferencePlace(reference, element, placement) {
 			const parent = getOffsetParent(element);
 			const referenceRect = reference.getBoundingClientRect();
 			const elementRect = element.getBoundingClientRect();
-			const offsetRect = parent.getBoundingClientRect();
+			const parentRect = parent.getBoundingClientRect();
 
 			const position = getPlacementOffset(referenceRect, elementRect, placement);
 			const scroll = getScrollOffset(parent);
 
-			element.style.left = (referenceRect.left - offsetRect.left + scroll.left + position.left) + 'px';
-			element.style.top = (referenceRect.top - offsetRect.top + scroll.top + position.top) + 'px';
+			const left = referenceRect.left - parentRect.left + scroll.left + position.left;
+			const top = referenceRect.top - parentRect.top + scroll.top + position.top;
+
+			return {
+				left: left,
+				top: top,
+				right: parent.clientWidth - elementRect.width - left,
+				bottom: parent.clientHeight - elementRect.height - top,
+				width: elementRect.width,
+				height: elementRect.height,
+			};
 		}
 
 		function initTooltips(context) {
@@ -152,7 +161,10 @@
 				const placement = reference.dataset.placement || 'bottom';
 				reference.addEventListener('mouseenter', () => {
 					tooltip.hidden = false;
-					referencePlace(reference, tooltip, placement);
+
+					const place = getReferencePlace(reference, tooltip, placement);
+					tooltip.style.left = place.left + 'px';
+					tooltip.style.top = place.top + 'px';
 				});
 				reference.addEventListener('mouseleave', () => {
 					tooltip.hidden = true;
